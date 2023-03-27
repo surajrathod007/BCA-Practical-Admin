@@ -61,6 +61,7 @@ class AddBooksActivity : AppCompatActivity() {
             }
 
             //make the book
+
             var demoImages = mutableListOf<String>()
             binding.llDemoImageContainer.forEach {
                 demoImages.add((it as EditText).text.toString())
