@@ -71,21 +71,24 @@ class AddBooksActivity : AppCompatActivity() {
                 demoImages.add((it as EditText).text.toString())
             }
             val tags = binding.edBookTags.text.toString()
-            val tagsList = tags.split(", ")
+            var tagsList = tags.split(", ").toMutableList().also {
+                it.add(0,binding.spSubject.selectedItem.toString())
+            }
+            val dLink = binding.spFileType.selectedItem.toString() + "^" + binding.edBookDownloadLink.text.toString()
             val book = Book(
                 title = binding.edBookTitle.text.toString(),
                 description = binding.edBookDescription.text.toString(),
                 imageUrl = binding.edBookPosterImage.text.toString(),
                 sem = binding.spSemester.selectedItem.toString(),
                 sub = binding.spSubject.selectedItem.toString(),
-                downloadLink = binding.edBookDownloadLink.text.toString(),
+                downloadLink = dLink,
                 demoImages = demoImages,
                 tags = tagsList
             )
             val collection = db.collection("books")
             val newBook = collection.document()
             newBook.set(book).addOnSuccessListener {
-                Toast.makeText(this, "Book added successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Book added successfully ${dLink.substringBefore("^")}", Toast.LENGTH_SHORT).show()
             }.addOnFailureListener {
                 Toast.makeText(this, "Error : ${it.message}", Toast.LENGTH_SHORT).show()
             }
@@ -220,5 +223,13 @@ class AddBooksActivity : AppCompatActivity() {
             }
 
         }
+
+        //load file type
+        val fileTypes = arrayOf("PDF", "ZIP", "JPG", "PNG", "JPEG")
+        val fileAdp = ArrayAdapter(
+            this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+            fileTypes
+        )
+        binding.spFileType.adapter = fileAdp
     }
 }
