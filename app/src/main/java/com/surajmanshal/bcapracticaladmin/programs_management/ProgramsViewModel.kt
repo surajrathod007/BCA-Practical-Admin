@@ -39,7 +39,7 @@ class ProgramsViewModel : FirebaseClientViewModel() {
     private val programsCollection = db.collection("newPrograms")
     suspend fun addProgram(success : (Boolean) -> Unit) {
         val programId = generateId()
-        programsCollection.document(programId.toString())
+        programsCollection.document()
             .set(
                 Program(
                     programId,
