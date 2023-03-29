@@ -5,11 +5,13 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 
 
 import androidx.compose.material.*
@@ -46,12 +48,21 @@ class ProgramsManagementActivity : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(12.dp)
+                                .padding(
+                                    12.dp,
+                                )
                         ) {
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    .fillMaxWidth()
+                                    .padding(
+                                        12.dp,
+                                        12.dp,
+                                        12.dp,
+                                        56.dp,
+                                    )
+                                    .verticalScroll(ScrollState(0),true),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
 
                                 Row (modifier = Modifier.fillMaxWidth()
