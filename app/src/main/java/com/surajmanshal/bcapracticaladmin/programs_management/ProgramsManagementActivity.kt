@@ -9,13 +9,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.surajmanshal.bcapracticaladmin.activity.ui.theme.BCAPracticalAdminTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +30,6 @@ class ProgramsManagementActivity : ComponentActivity() {
     private val vm by lazy { viewModels<ProgramsViewModel>() }
     private val fullWidthVerticalArrangement = Modifier
         .fillMaxWidth()
-        .padding(0.dp, 8.dp)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,35 +46,46 @@ class ProgramsManagementActivity : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(8.dp)
+                                .padding(12.dp)
                         ) {
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
 
-                                val semSubject by semSubjects.collectAsState()
-                                val selectedSem by programSem.collectAsState()
-                                val selectedSub by programSubject.collectAsState()
-                                val selectedUnit by programUnit.collectAsState()
+                                Row (modifier = Modifier.fillMaxWidth()
+                                , horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ){
 
-                                dropDown(items = semesters, selectedItem = selectedSem){ sem ->
-                                    setProgramSemester(sem)
-                                    semSubjects.value = subjects[semesters.indexOf(sem)]
+                                    val semSubject by semSubjects.collectAsState()
+                                    val selectedSem by programSem.collectAsState()
+                                    val selectedSub by programSubject.collectAsState()
+                                    val selectedUnit by programUnit.collectAsState()
+
+                                    dropDown(items = semesters, selectedItem = selectedSem){ sem ->
+                                        setProgramSemester(sem)
+                                        semSubjects.value = subjects[semesters.indexOf(sem)]
 //                                    setProgramSubject(semSubject.first())
-                                }
-                                dropDown(items = semSubject , selectedSub){
-                                    setProgramSubject(it)
-                                }
-                                dropDown(items = units , selectedUnit){
-                                    setProgramUnit(it)
+                                    }
+                                    dropDown(items = semSubject , selectedSub){
+                                        setProgramSubject(it)
+                                    }
+                                    dropDown(items = units , selectedUnit){
+                                        setProgramUnit(it)
+                                    }
                                 }
                                 textBox(etTitle,"Title") { programTitle.value = it }
                                 textBox(etCode, "Program Code") { programCode.value = it }
                             }
                             Button(modifier = Modifier
                                 .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
+                                .height(48.dp)
+                                .align(Alignment.BottomCenter)
+                                ,
+                                shape = RoundedCornerShape(28.dp),
+
                                 onClick = {
                                     CoroutineScope(Dispatchers.IO).launch{
                                         addProgram(){
@@ -86,7 +100,7 @@ class ProgramsManagementActivity : ComponentActivity() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }) {
-                                Text(text = "Add Program")
+                                Text(text = "Add Program" , fontSize = 18.sp)
                             }
                         }
                     }
@@ -103,14 +117,14 @@ class ProgramsManagementActivity : ComponentActivity() {
         var selectedItem by remember {
             mutableStateOf(selectedItem)
         }
-        Box {
+        Box() {
             Column {
                 OutlinedTextField(
                     value = selectedItem,
                     onValueChange = {
                         selectedItem = it
                                     },
-                    modifier = fullWidthVerticalArrangement.clickable(false){})
+                    modifier = Modifier.width(108.dp).clickable(false){})
                 DropdownMenu(
                     expanded = mExpanded,
                     onDismissRequest = { mExpanded = false },
@@ -121,7 +135,6 @@ class ProgramsManagementActivity : ComponentActivity() {
                             selectedItem = it
                         }) {
                             Text(text = it, modifier = Modifier
-                                .fillMaxWidth()
                                 .padding(16.dp, 2.dp))
                         }
                     }
@@ -131,7 +144,6 @@ class ProgramsManagementActivity : ComponentActivity() {
                 modifier = Modifier
                     .matchParentSize()
                     .background(Color.Transparent)
-                    .padding(10.dp)
                     .clickable(
                         onClick = { mExpanded = true }
                     )

@@ -27,7 +27,7 @@ class ProgramsViewModel : FirebaseClientViewModel() {
     private val sem3Subjects = listOf("OOCP", "DS_ALGO")
     private val sem4Subjects = listOf("CJ", "DBMS 2", "WPC#")
     private val sem5Subjects = listOf("PYTHON", "ASP.NET")
-    private val sem6Subjects = listOf("WEB APP DEV")
+    private val sem6Subjects = listOf("WEB APP DEV","SPP")
     val subjects = listOf(sem1Subjects,sem2Subjects,sem3Subjects,sem4Subjects,sem5Subjects,sem6Subjects)
 
     val programTitle = MutableStateFlow("")
