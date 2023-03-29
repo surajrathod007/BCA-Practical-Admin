@@ -2,9 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".MyApp"
         android:allowBackup="true"
@@ -16,6 +17,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BCAPracticalAdmin"
         tools:targetApi="31">
+        <activity
+            android:name=".programs_management.ProgramsManagementActivity"
+            android:exported="false"
+            android:label="@string/title_activity_programs_management"
+            android:theme="@style/Theme.BCAPracticalAdmin" >
+
+        </activity>
         <activity
             android:name=".activity.AddBooksActivity"
             android:exported="false">
