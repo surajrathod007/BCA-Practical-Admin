@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BCA Practical Admin</string>
+    <string name="title_activity_programs_management">ProgramsManagementActivity</string>
 </resources>
