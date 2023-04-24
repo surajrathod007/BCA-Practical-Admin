@@ -7,6 +7,6 @@ data class Book(
     val sem : String,
     val sub : String,
     val downloadLink : String,
-    val demoImages : List<String>? = null,
+    val demoImages : MutableList<String>? = null,
     val tags : List<String>? = null
 )

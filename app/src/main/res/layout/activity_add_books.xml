@@ -18,6 +18,16 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgBookPoster"
+                android:layout_width="180dp"
+                android:layout_height="240dp"
+                android:layout_gravity="center"
+                android:layout_margin="16dp"
+                app:shapeAppearance="@style/ShapeAppearanceOverlay.Material3.Chip"
+                app:srcCompat="@drawable/ic_launcher_background"
+                android:background="@color/white"
+                android:scaleType="centerCrop" />
             <EditText
                 android:id="@+id/edBookTitle"
                 android:layout_width="match_parent"
@@ -84,6 +94,14 @@
                 android:orientation="vertical">
 
             </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDemoImages"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_demo_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
             <TextView
                 android:layout_marginHorizontal="8dp"

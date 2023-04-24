@@ -1,7 +1,17 @@
 package com.surajmanshal.bcapracticaladmin.activity
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.ProgressDialog
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -9,18 +19,33 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
 import android.widget.Toolbar.LayoutParams
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
+import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationBarView.OnItemSelectedListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.surajmanshal.bcapracticaladmin.R
+import com.surajmanshal.bcapracticaladmin.adapter.BookDemoImagesAdapter
 import com.surajmanshal.bcapracticaladmin.databinding.ActivityAddBooksBinding
 import com.surajmanshal.bcapracticaladmin.model.Book
+import com.surajmanshal.bcapracticaladmin.viewmodel.BooksViewModel
 import java.util.jar.Attributes
 
 class AddBooksActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityAddBooksBinding
+    lateinit var vm : BooksViewModel
     val db = FirebaseFirestore.getInstance()
+    val storage = Firebase.storage.reference
+    val CHOOSE_IMAGE_REQ_CODE = 101
+    val READ_EXTERNAL_STORAGE_REQ_CODE = 102
+    val CHOOSE_BOOK_POSTER = 103
+    var posterUrl = ""
+    var urls = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,13 +53,115 @@ class AddBooksActivity : AppCompatActivity() {
         binding = ActivityAddBooksBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        vm = ViewModelProvider(this).get(BooksViewModel::class.java)
 
+        storage.child("images/1682227795508Image.jpg").downloadUrl.addOnSuccessListener {
+            Toast.makeText(this@AddBooksActivity, "url : $it", Toast.LENGTH_LONG).show()
+        }
 
+        setUpObservers()
         setupSpinners()
         setupClickListeners()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(resultCode==Activity.RESULT_OK && requestCode==CHOOSE_IMAGE_REQ_CODE){
+            if(data!=null){
+                try {
+                    val p = ProgressDialog(this)
+                    p.setTitle("Please wait...")
+                    p.show()
+                    val imgUri = data.data
+                    val filename = System.currentTimeMillis().toString()+"Image.jpg"
+                    val uploadTask = imgUri?.let { storage.child("images/$filename").putFile(it) }
+                    uploadTask?.addOnSuccessListener {
+                        Toast.makeText(this@AddBooksActivity, "Image Uploaded", Toast.LENGTH_SHORT).show()
+                        storage.child("images/$filename").downloadUrl.addOnSuccessListener {
+                            Toast.makeText(this@AddBooksActivity, "url : $it", Toast.LENGTH_LONG).show()
+                            vm.addImage(it.toString())
+                            p.dismiss()
+                        }
+                    }?.addOnFailureListener {
+                        Toast.makeText(this@AddBooksActivity, "${it.message}", Toast.LENGTH_SHORT).show()
+                        p.dismiss()
+                    }
+
+                }catch (e : Exception){
+                    Toast.makeText(this@AddBooksActivity, " Choose Image : ${e.message}", Toast.LENGTH_SHORT).show()
+
+                }
+            }
+        }else if(resultCode==Activity.RESULT_OK && requestCode==CHOOSE_BOOK_POSTER){
+            if(data != null){
+                try{
+                    val p = ProgressDialog(this)
+                    p.setTitle("Please wait...")
+                    p.show()
+                    val imgUri = data.data
+                    val filename = System.currentTimeMillis().toString()+"Image.jpg"
+                    val uploadTask = imgUri?.let { storage.child("images/$filename").putFile(it) }
+
+                    uploadTask?.addOnSuccessListener {
+                        Toast.makeText(this@AddBooksActivity, "Image Uploaded", Toast.LENGTH_SHORT).show()
+                        storage.child("images/$filename").downloadUrl.addOnSuccessListener {
+                            Toast.makeText(this@AddBooksActivity, "Poster url : $it", Toast.LENGTH_LONG).show()
+                            Glide.with(this@AddBooksActivity).load(it).into(binding.imgBookPoster)
+                            posterUrl = it.toString()
+                            p.dismiss()
+                        }
+                    }?.addOnFailureListener {
+                        Toast.makeText(this@AddBooksActivity, "${it.message}", Toast.LENGTH_SHORT).show()
+                        p.dismiss()
+                    }
+
+                }catch (e : Exception){
+
+                }
+            }
+        }
+    }
+
+    private fun setUpObservers() {
+        vm.demoImages.observe(this){
+            binding.rvDemoImages.adapter = BookDemoImagesAdapter(vm){
+                Toast.makeText(this@AddBooksActivity, "Choose Image", Toast.LENGTH_SHORT).show()
+                chooseImage()
+            }
+        }
+        vm.demoImagesUrl.observe(this){
+            Toast.makeText(this@AddBooksActivity, "$it", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun chooseImage(){
+        if(ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+            val storageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            // IT IS DEPRECATED FIND LATEST METHOD FOR IT
+            startActivityForResult(storageIntent, CHOOSE_IMAGE_REQ_CODE)
+        }else{
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),READ_EXTERNAL_STORAGE_REQ_CODE)
+        }
+    }
+
+    fun choosePoster(){
+        if(ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+            val storageIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            // IT IS DEPRECATED FIND LATEST METHOD FOR IT
+            startActivityForResult(storageIntent, CHOOSE_BOOK_POSTER)
+        }else{
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),READ_EXTERNAL_STORAGE_REQ_CODE)
+        }
+    }
+
     private fun setupClickListeners() {
+
+        binding.imgBookPoster.setOnClickListener {
+            choosePoster()
+        }
 
         binding.btnAddDemoImage.setOnClickListener {
             val layout = binding.llDemoImageContainer
@@ -70,19 +197,23 @@ class AddBooksActivity : AppCompatActivity() {
             binding.llDemoImageContainer.forEach {
                 demoImages.add((it as EditText).text.toString())
             }
+
             val tags = binding.edBookTags.text.toString()
             var tagsList = tags.split(", ").toMutableList().also {
                 it.add(0,binding.spSubject.selectedItem.toString())
             }
             val dLink = binding.spFileType.selectedItem.toString() + "^" + binding.edBookDownloadLink.text.toString()
+            val newUrls = vm.demoImages.value?.apply {
+                remove(last())
+            }
             val book = Book(
                 title = binding.edBookTitle.text.toString(),
                 description = binding.edBookDescription.text.toString(),
-                imageUrl = binding.edBookPosterImage.text.toString(),
+                imageUrl = posterUrl,
                 sem = binding.spSemester.selectedItem.toString(),
                 sub = binding.spSubject.selectedItem.toString(),
                 downloadLink = dLink,
-                demoImages = demoImages,
+                demoImages = newUrls,
                 tags = tagsList
             )
             val collection = db.collection("books")
@@ -93,6 +224,21 @@ class AddBooksActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error : ${it.message}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    @SuppressLint("Range")
+    private fun getFileName(context: Context, uri: Uri): String? {
+        if (uri.scheme == "content") {
+            val cursor = context.contentResolver.query(uri, null, null, null, null)
+            cursor.use {
+                if (cursor != null) {
+                    if(cursor.moveToFirst()) {
+                        return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                    }
+                }
+            }
+        }
+        return uri.path?.lastIndexOf('/')?.let { uri.path?.substring(it) }
     }
 
     private fun setupSpinners() {
